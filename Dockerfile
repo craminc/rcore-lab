@@ -62,6 +62,8 @@ ENV RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:$PATH \
     RUST_VERSION=nightly
 RUN set -eux; \
+    export RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static; \
+    export RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup; \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup-init; \
     chmod +x rustup-init; \
     ./rustup-init -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION; \
@@ -73,11 +75,20 @@ RUN rustup --version && \
     cargo --version && \
     rustc --version
 
+# 2.3. change cargo.io source
+RUN mkdir -vp ${CARGO_HOME:-$HOME/.cargo} && \
+    echo "[source.crates-io]" >> ${CARGO_HOME:-$HOME/.cargo}/config && \
+    echo "registry = \"https://github.com/rust-lang/crates.io-index\"" >> ${CARGO_HOME:-$HOME/.cargo}/config && \
+    echo "replace-with = 'ustc'" >> ${CARGO_HOME:-$HOME/.cargo}/config && \
+    echo "[source.ustc]" >> ${CARGO_HOME:-$HOME/.cargo}/config && \
+    echo "registry = \"git://mirrors.ustc.edu.cn/crates.io-index\"" >> ${CARGO_HOME:-$HOME/.cargo}/config && \
+    cat ${CARGO_HOME:-$HOME/.cargo}/config
+
 # 3. Build env for labs
 # See os1/Makefile `env:` for example.
 # This avoids having to wait for these steps each time using a new container.
 RUN rustup target add riscv64gc-unknown-none-elf && \
-    cargo install cargo-binutils --vers ~0.2 && \
+    cargo install cargo-binutils && \
     rustup component add rust-src && \
     rustup component add llvm-tools-preview
 
