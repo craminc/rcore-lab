@@ -92,5 +92,13 @@ RUN rustup target add riscv64gc-unknown-none-elf && \
     rustup component add rust-src && \
     rustup component add llvm-tools-preview
 
+# Install gdb
+WORKDIR ${HOME}
+RUN wget -q https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz && \
+    tar -xzf riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz && \
+    rm riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz
+# Add to path
+RUN echo "export PATH=$PATH:/root/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin" >> .bashrc
+
 # Ready to go
 WORKDIR ${HOME}
